@@ -13,6 +13,7 @@ from keras.models import Model
 from keras_frcnn import roi_helpers
 from keras_frcnn import data_generators
 from sklearn.metrics import average_precision_score
+from utils import format_img_channels
 
 
 def get_map(pred, gt, f):
@@ -128,14 +129,7 @@ def format_img(img, C):
 	fx = width/float(new_width)
 	fy = height/float(new_height)
 	img = cv2.resize(img, (new_width, new_height), interpolation=cv2.INTER_CUBIC)
-	img = img[:, :, (2, 1, 0)]
-	img = img.astype(np.float32)
-	img[:, :, 0] -= C.img_channel_mean[0]
-	img[:, :, 1] -= C.img_channel_mean[1]
-	img[:, :, 2] -= C.img_channel_mean[2]
-	img /= C.img_scaling_factor
-	img = np.transpose(img, (2, 0, 1))
-	img = np.expand_dims(img, axis=0)
+	img = format_img_channels(img, C)
 	return img, fx, fy
 
 
