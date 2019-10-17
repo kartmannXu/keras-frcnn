@@ -18,6 +18,38 @@ from tensorflow.python.keras.utils import generic_utils
 
 sys.setrecursionlimit(40000)
 
+<<<<<<< HEAD
+=======
+parser = OptionParser()
+
+parser.add_option("-p", "--path", dest="train_path", help="Path to training data.")
+parser.add_option("-o", "--parser", dest="parser", help="Parser to use. One of simple or pascal_voc",
+                  default="pascal_voc")
+parser.add_option("-n", "--num_rois", type="int", dest="num_rois", help="Number of RoIs to process at once.",
+                  default=32)
+parser.add_option("--network", dest="network", help="Base network to use. Supports vgg or resnet50.",
+                  default='resnet50')
+parser.add_option("--hf", dest="horizontal_flips", help="Augment with horizontal flips in training. (Default=false).",
+                  action="store_true", default=False)
+parser.add_option("--vf", dest="vertical_flips", help="Augment with vertical flips in training. (Default=false).",
+                  action="store_true", default=False)
+parser.add_option("--rot", "--rot_90", dest="rot_90",
+                  help="Augment with 90 degree rotations in training. (Default=false).",
+                  action="store_true", default=False)
+parser.add_option("--num_epochs", type="int", dest="num_epochs", help="Number of epochs.", default=2000)
+parser.add_option("--config_filename", dest="config_filename", help=
+"Location to store all the metadata related to the training (to be used when testing).",
+                  default="config.pickle")
+parser.add_option("--output_weight_path", dest="output_weight_path", help="Output path for weights.",
+                  default='weights\\model_frcnn_{}')
+parser.add_option("--input_weight_path", dest="input_weight_path",
+                  help="Input path for weights. If not specified, will try to load default weights provided by keras.")
+parser.add_option("--epoch_length", dest="epoch_length", type=int, default=1000, help="Iterations per Epoch.")
+options, args = parser.parse_args()
+
+if not options.train_path:  # if filename is not given
+    parser.error('Error: path to training data must be specified. Pass --path to command line')
+>>>>>>> 1c246cbd3b320e90f17c23ee67056254e2ff9427
 
 def parse_args():
     parser = OptionParser()
@@ -157,6 +189,7 @@ except Exception as e:
 
 optimizer = Adam(lr=1e-5, decay=1e-7)
 optimizer_classifier = Adam(lr=1e-5, decay=1e-7)
+
 model_rpn.compile(optimizer=optimizer, loss=[losses.rpn_loss_cls(num_anchors), losses.rpn_loss_regr(num_anchors)])
 model_classifier.compile(optimizer=optimizer_classifier,
                          loss=[losses.class_loss_cls, losses.class_loss_regr(len(classes_count) - 1)],
