@@ -20,7 +20,7 @@ from keras_frcnn.RoiPoolingConv import RoiPoolingConv
 
 
 def get_weight_path():
-    if K.image_dim_ordering() == 'th':
+    if K.backend() == 'theano':
         print('pretrained weights not available for VGG with theano backend')
         return
     else:
@@ -33,11 +33,12 @@ def get_img_output_length(width, height):
 
     return get_output_length(width), get_output_length(height)    
 
+
 def nn_base(input_tensor=None, trainable=False):
 
 
     # Determine proper input shape
-    if K.image_dim_ordering() == 'th':
+    if K.backend() == 'theano':
         input_shape = (3, None, None)
     else:
         input_shape = (None, None, 3)
@@ -50,7 +51,7 @@ def nn_base(input_tensor=None, trainable=False):
         else:
             img_input = input_tensor
 
-    if K.image_dim_ordering() == 'tf':
+    if K.backend() == 'tensorflow':
         bn_axis = 3
     else:
         bn_axis = 1

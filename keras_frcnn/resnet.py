@@ -175,7 +175,6 @@ def nn_base(input_tensor=None, trainable=False):
         bn_axis = 3
     else:
         bn_axis = 1
-
     x = ZeroPadding2D((3, 3))(img_input)
     x = Convolution2D(64, (7, 7), strides=(2, 2), name='conv1', trainable = trainable)(x)
     x = FixedBatchNormalization(axis=bn_axis, name='bn_conv1')(x)

@@ -6,9 +6,9 @@ import pickle
 from optparse import OptionParser
 import time
 from keras_frcnn import config
-from keras import backend as K
-from keras.layers import Input
-from keras.models import Model
+from tensorflow.python.keras import backend as K
+from tensorflow.python.keras.layers import Input
+from tensorflow.python.keras.models import Model
 from keras_frcnn import roi_helpers
 from utils import *
 
@@ -104,6 +104,9 @@ bbox_threshold = 0.8
 
 visualise = True
 
+if os.path.exists(".\\results_imgs"):
+    os.mkdir(".\\results_imgs")
+
 for idx, img_name in enumerate(sorted(os.listdir(img_path))):
     if not img_name.lower().endswith(('.bmp', '.jpeg', '.jpg', '.png', '.tif', '.tiff')):
         continue
@@ -121,8 +124,7 @@ for idx, img_name in enumerate(sorted(os.listdir(img_path))):
     # get the feature maps and output from the RPN
     [Y1, Y2, F] = model_rpn.predict(X)
 
-
-    R = roi_helpers.rpn_to_roi(Y1, Y2, C, K.image_dim_ordering(), overlap_thresh=0.7)
+    R = roi_helpers.rpn_to_roi(Y1, Y2, C, K.backend(), overlap_thresh=0.7)
 
     # convert from (x1,y1,x2,y2) to (x,y,w,h)
     R[:, 2] -= R[:, 0]
@@ -146,7 +148,7 @@ for idx, img_name in enumerate(sorted(os.listdir(img_path))):
             ROIs_padded[0, curr_shape[1]:, :] = ROIs[0, 0, :]
             ROIs = ROIs_padded
 
-        [P_cls, P_regr] = model_classifier_only.predict([F, ROIs])
+        [P_cls, P_regr] = model_classifier.predict([F, ROIs])
 
         for ii in range(P_cls.shape[1]):
 
@@ -188,7 +190,7 @@ for idx, img_name in enumerate(sorted(os.listdir(img_path))):
             cv2.rectangle(img,(real_x1, real_y1), (real_x2, real_y2), (int(class_to_color[key][0]), int(class_to_color[key][1]), int(class_to_color[key][2])),2)
 
             textLabel = '{}: {}'.format(key,int(100*new_probs[jk]))
-            all_dets.append((key,100*new_probs[jk]))
+            all_dets.append((key,100*new_probs[jk], [x1, y1, x2, y2]))
 
             (retval,baseLine) = cv2.getTextSize(textLabel,cv2.FONT_HERSHEY_COMPLEX,1,1)
             textOrg = (real_x1, real_y1-0)
@@ -199,6 +201,6 @@ for idx, img_name in enumerate(sorted(os.listdir(img_path))):
 
     print('Elapsed time = {}'.format(time.time() - st))
     print(all_dets)
-    cv2.imshow('img', img)
-    cv2.waitKey(0)
-    # cv2.imwrite('.\\results_imgs\\{}.png'.format(idx),img)
+    # cv2.imshow('img', img)
+    # cv2.waitKey(0)
+    cv2.imwrite('.\\results_imgs\\{}.png'.format(idx),img)
