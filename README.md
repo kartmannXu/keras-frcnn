@@ -29,7 +29,7 @@ settings can then be loaded in testing part. Thus in testing, only these 4 argum
 
 - Test mode in `main.py` can be used to perform inference, given pretrained weights and a config file. Specify a path to the folder containing
 images:
-    `python test_frcnn.py -p /path/to/test_data/`
+    `python main.py --mode test -p /path/to/test_data/ -c /path/to/config_file.pickle`
 - Data augmentation can be applied by specifying `--hf` for horizontal flips, `--vf` for vertical flips and `--rot` for 90 degree rotations
 - In training, the value of `output_weight_path` must contains a pair of empty brace, you could refer to the default value: `weights\\model_frcnn_{}`.
 - In testing, the value of `input_weight_path` is __NOT__ the file name, it should be the prefix of the weights files output by training process, 
