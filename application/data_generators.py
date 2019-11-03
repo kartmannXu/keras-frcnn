@@ -1,12 +1,8 @@
 from __future__ import absolute_import
 import numpy as np
-import cv2
 import random
-import copy
-from . import data_augment
 import threading
 import itertools
-from utils import format_img_channels
 
 
 def union(au, bu, area_intersection):
@@ -275,62 +271,3 @@ def threadsafe_generator(f):
         return threadsafe_iter(f(*a, **kw))
 
     return g
-
-
-def get_anchor_gt(all_img_data, class_count, C, img_length_calc_function, backend, mode='train'):
-    # The following line is not useful with Python 3.5, it is kept for the legacy
-    # all_img_data = sorted(all_img_data)
-
-    sample_selector = SampleSelector(class_count)
-
-    while True:
-        if mode == 'train':
-            np.random.shuffle(all_img_data)
-
-        for img_data in all_img_data:
-            try:
-
-                if C.balanced_classes and sample_selector.skip_sample_for_balanced_class(img_data):
-                    continue
-
-                # read in image, and optionally add augmentation
-
-                if mode == 'train':
-                    img_data_aug, x_img = data_augment.augment(img_data, C, augment=True)
-                else:
-                    img_data_aug, x_img = data_augment.augment(img_data, C, augment=False)
-
-                (width, height) = (img_data_aug['width'], img_data_aug['height'])
-                (rows, cols, _) = x_img.shape
-
-                assert cols == width
-                assert rows == height
-
-                # get image dimensions for resizing
-                (resized_width, resized_height) = get_new_img_size(width, height, C.im_size)
-
-                # resize the image so that smalles side is length = 600px
-                x_img = cv2.resize(x_img, (resized_width, resized_height), interpolation=cv2.INTER_CUBIC)
-
-                try:
-                    y_rpn_cls, y_rpn_regr = calc_rpn(C, img_data_aug, width, height, resized_width, resized_height,
-                                                     img_length_calc_function)
-                except:
-                    continue
-
-                # Zero-center by mean pixel, and preprocess image
-
-                x_img = format_img_channels(x_img, C)
-
-                y_rpn_regr[:, y_rpn_regr.shape[1] // 2:, :, :] *= C.std_scaling
-
-                if backend == 'tensorflow':
-                    x_img = np.transpose(x_img, (0, 2, 3, 1))
-                    y_rpn_cls = np.transpose(y_rpn_cls, (0, 2, 3, 1))
-                    y_rpn_regr = np.transpose(y_rpn_regr, (0, 2, 3, 1))
-
-                yield np.copy(x_img), [np.copy(y_rpn_cls), np.copy(y_rpn_regr)], img_data_aug
-
-            except Exception as e:
-                print(e)
-                continue
