@@ -1,5 +1,6 @@
-h5py
-Keras==2.0.3
-numpy
-opencv-python
-sklearn
+# conda create -n rtav python=3.6 tensorflow=1.12.0 tensorflow-gpu=1.12.0 cudatoolkit=9.0 cudnn=7.6.0 h5py Shapely sklearn
+# conda activate rtav
+# pip install -r requirements.txt
+
+opencv-python==3.4.2.17
+
